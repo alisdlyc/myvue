@@ -6,15 +6,13 @@
 
 <script>
   let i = parseInt(Math.random()*8+1);
-  console.log(i);
-  // let i = 23
   export default {
     name: 'App',
 
     data(){
       return{
         pluginPath: i+"/",
-        modelPath: "../static/live2dw/"+i+"/model.json",
+        modelPath: "./static/live2dw/"+i+"/model.json",
       }
     },
 

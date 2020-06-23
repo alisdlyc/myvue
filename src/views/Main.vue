@@ -18,7 +18,7 @@
             <div v-for="book in books">
               <div class="book">
                 <input type="hidden" v-bind:placeholder="book.id">
-                <img v-bind:src="book.localImgLink" alt="皮卡皮卡" class="bookImg">
+                <img :src="book.localImgLink" onerror="javascript:this.src='http://www.alisdlyc.top:5120/uploads/big/7329267c9a4f6ea23ae0a1882875f078.png'" alt="皮卡皮卡" class="bookImg">
                 <div class="bookName">
                   {{book.bookName}}
                 </div>
@@ -39,7 +39,7 @@
             <div v-for="book in books">
               <div class="book">
                 <input type="hidden" v-bind:placeholder="book.id">
-                <img v-bind:src="book.localImgLink" alt="皮卡皮卡" class="bookImg">
+                <img v-bind:src="book.localImgLink" onerror="javascript:this.src='http://www.alisdlyc.top:5120/uploads/big/7329267c9a4f6ea23ae0a1882875f078.png'" alt="皮卡皮卡" class="bookImg">
                 <div class="bookName">
                   {{book.bookName}}
                 </div>
@@ -59,13 +59,16 @@
 
         <div class="block">
           <el-pagination
-            page-size= 10
             background
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             layout="prev, pager, next"
-            :total="totalPages">
+            :total="total">
           </el-pagination>
+        </div>
+        <div class="scrollTop" v-show="showTop" @click="toTop">
+          <div>{{this.hitokoto.hitokoto}}</div>
+          <div>--{{this.hitokoto.from}}</div>
         </div>
       </el-container>
     </div>
@@ -127,7 +130,7 @@
     font-size: small;
     font-weight: 300;
     position: relative;
-    margin: -48px 0px 28px 244px;
+    margin: -48px 0 28px 244px;
     display: block;
     width: max-content;
     max-lines: 1;
@@ -138,7 +141,7 @@
     font-size: small;
     font-weight: 300;
     position: relative;
-    margin: -20px 0px 5px 244px;
+    margin: -20px 0 5px 244px;
     display: block;
     width: max-content;
     max-lines: 1;
@@ -196,6 +199,15 @@
     clear: both;
     border-radius: 10px;
   }
+
+  .scrollTop {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 23px;
+    font-family: 微软雅黑;
+    font-weight: 500;
+    color: darkgray;
+  }
 </style>
 
 <script>
@@ -206,6 +218,12 @@
 
     data(){
       return {
+        // 返回顶部
+        scrollTop: 0,
+        time: 0,
+        dParams: 20,
+        scrollState: 0,
+        // 接收首次查询的参数
         qwq: this.$route.params.msg,
         searchPage: 1,
         books:[{
@@ -218,45 +236,86 @@
           localImgLink:null,
         }],
         currentPage:1,
-        totalPages:null,
+        total:10,
         pageSize:10,
         hasNext:null,
         hasPre:null,
         searchMsg: '',
+
+        hitokoto:{
+          id:null,
+          hitokoto:null,
+          type:null,
+          from:null,
+          from_who:null,
+          creator:null,
+          creator_uid:null,
+          reviewer:null,
+          uuid:null,
+          created_at:null,
+        }
       }
     },
     mounted() {
-      axios({
-        url:'http://39.107.77.0:3090/monoid/info/'+this.qwq+'/'+this.searchPage,
-        method:'get'
-      }).then(res=>{
+      window.addEventListener('scroll', this.getScrollTop);
 
-        // this.currentPage = res.data.currentPage;
-        this.totalPages = res.data.totalPages*10;
-        this.hasNext = res.data.hasNext;
-        this.hasPre = res.data.hasPre;
-        this.books = res.data.data;
-      })
+      let data = new FormData();
+      data.append('name', this.qwq);
+      data.append('pageIndex', this.searchPage);
+      axios.post('http://49.233.166.163:8888/monoid/getSearchRes', data)
+        .then(res=>{
+          console.log(res.data);
+          this.total = res.data.total;
+          this.hasNext = res.data.hasNext;
+          this.hasPre = res.data.hasPre;
+          this.books = res.data.data;
+        })
+
+        axios({
+          url:'https://v1.hitokoto.cn/',
+          method:'get',
+          data:{
+            c:'i',
+            encode:'json',
+            charset:'utf-8',
+          },
+          timeout:1000,
+        }).then(res=>{
+          console.log(res.data);
+          this.hitokoto = res.data;
+        });
+    },
+    computed:{
+      showTop: function(){
+        let value = this.scrollTop>200?true:false;
+        return value;
+      },
     },
     methods: {
       toSearch: function () {
         if(this.searchMsg){
+          console.log(this.searchMsg+"当前搜索的内容为"+this.searchMsg);
           let msg = this.searchMsg;
           this.searchMsg = '';
           this.$router.push({name: '/main',params:{msg: msg}})
+          location.reload();
         }else{
           // 当搜索框中参数为空时，且由searchPage传回来的参数不为空，传入新的页面下标
           if(this.qwq){
             // 执行搜索方法
-            axios({
-              url:'http://39.107.77.0:3090/monoid/info/'+this.qwq+'/'+this.searchPage,
-              method:'get'
-            }).then(res=>{
-              this.totalPages = res.data.totalPages*10;
-              this.hasNext = res.data.hasNext;
-              this.hasPre = res.data.hasPre;
-              this.books = res.data.data;
-            })
+            console.log(this.qwq+"搜索页面下标为"+this.searchPage);
+            let data = new FormData();
+            data.append('name', this.qwq);
+            data.append('pageIndex', this.searchPage);
+
+            axios.post('http://49.233.166.163:8888/monoid/getSearchRes', data)
+              .then(res=>{
+                console.log(res.data);
+                this.total = res.data.total;
+                this.hasNext = res.data.hasNext;
+                this.hasPre = res.data.hasPre;
+                this.books = res.data.data;
+              })
           }
         }
       },
@@ -268,7 +327,30 @@
         this.searchPage = currentPage;
         this.toSearch();
       },
-
+      // 返回顶部
+      toTop(e) {
+        if(!!this.scrollState){
+          return;
+        }
+        this.scrollState = 1;
+        e.preventDefault();
+        let distance = document.documentElement.scrollTop || document.body.scrollTop;
+        let _this = this;
+        this.time = setInterval(function(){ _this.gotoTop(_this.scrollTop-_this.dParams) }, 10);
+      },
+      gotoTop(distance){
+        this.dParams += 20;
+        distance = distance>0 ? distance : 0;
+        document.documentElement.scrollTop = document.body.scrollTop = window.pageYOffset = distance;
+        if(this.scrollTop < 10){
+          clearInterval(this.time);
+          this.dParams = 20;
+          this.scrollState = 0;
+        }
+      },
+      getScrollTop() {
+        this.scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+      }
     },
   }
 </script>

@@ -2,7 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 
 import Main from "../views/Main";
-import Login from "../views/Login";
+
 import Search from "../views/Search";
 
 // 导入404页面
@@ -10,13 +10,8 @@ import NotFound from '../views/NotFind';
 Vue.use(VueRouter);
 
 export default new VueRouter({
-  mode: "history",
+  publicPath:"/",
   routes:[
-    {
-      path: '/login',
-      name: 'login',
-      component: Login,
-    },
     {
       path: '/main/:msg',
       name: '/main',
@@ -29,7 +24,7 @@ export default new VueRouter({
     },
     {
       path: '*',
-      component: NotFound
+      component: Search
     }
   ]
 });
