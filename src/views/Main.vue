@@ -14,7 +14,7 @@
           </div>
         </el-header>
         <el-container>
-          <el-aside width="52%">
+          <el-aside width="0%">
             <div v-for="book in books">
               <div class="book">
                 <input type="hidden" v-bind:placeholder="book.id">
@@ -39,18 +39,18 @@
             <div v-for="book in books">
               <div class="book">
                 <input type="hidden" v-bind:placeholder="book.id">
-                <img v-bind:src="book.localImgLink" onerror="javascript:this.src='http://www.alisdlyc.top:5120/uploads/big/7329267c9a4f6ea23ae0a1882875f078.png'" alt="皮卡皮卡" class="bookImg">
+                <img v-bind:src="book.imgUrl" onerror="javascript:this.src='http://www.alisdlyc.top:5120/uploads/big/7329267c9a4f6ea23ae0a1882875f078.png'" alt="皮卡皮卡" class="bookImg">
                 <div class="bookName">
-                  {{book.bookName}}
+                  {{book.title}}
                 </div>
                 <div class="writer">
-                  {{book.writer}}
+                  {{book.authors}}
                 </div>
                 <div class="press">
-                  {{book.press}}
+                  {{book.publisher}}
                 </div>
                 <div class="pubDate">
-                  {{book.pubDate}}
+                  {{book.pubdateDate}}
                 </div>
               </div>
             </div>
@@ -227,13 +227,22 @@
         qwq: this.$route.params.msg,
         searchPage: 1,
         books:[{
-          id:null,
-          bookName:null,
-          writer:null,
-          press:null,
-          rating:null,
-          pubDate:null,
-          localImgLink:null,
+          title: null,
+          authors: null,
+          classno: null,
+          classnoAbs: null,
+          commentCount: null,
+          guancangCount: null,
+          heading: null,
+          imgUrl: null,
+          isn: null,
+          kejieCount: null,
+          libraryId: null,
+          libraryName: null,
+          pubdateDate: null,
+          publisher: null,
+          reGrade: null,
+          recCtrlId: null,
         }],
         currentPage:1,
         total:10,
@@ -260,9 +269,10 @@
       window.addEventListener('scroll', this.getScrollTop);
 
       let data = new FormData();
-      data.append('name', this.qwq);
+      data.append('title', this.qwq);
       data.append('pageIndex', this.searchPage);
-      axios.post('http://49.233.166.163:8888/monoid/getSearchRes', data)
+      // 通过post请求进行查询与分页操作
+      axios.post('http://127.0.0.1:8080/book/search/', data)
         .then(res=>{
           console.log(res.data);
           this.total = res.data.total;
@@ -305,10 +315,10 @@
             // 执行搜索方法
             console.log(this.qwq+"搜索页面下标为"+this.searchPage);
             let data = new FormData();
-            data.append('name', this.qwq);
+            data.append('title', this.qwq);
             data.append('pageIndex', this.searchPage);
 
-            axios.post('http://49.233.166.163:8888/monoid/getSearchRes', data)
+            axios.post('http://127.0.0.1:8080/book/search/', data)
               .then(res=>{
                 console.log(res.data);
                 this.total = res.data.total;
