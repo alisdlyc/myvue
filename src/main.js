@@ -12,8 +12,12 @@ import 'element-ui/lib/theme-chalk/index.css';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 
-// 导入live2d
-import live2d4vue from 'live2d4vue';
+import VueCookies from 'vue-cookies'
+
+
+import VueCodeMirror from 'vue-codemirror';
+import 'codemirror/lib/codemirror.css';
+
 
 
 Vue.config.productionTip = false;
@@ -21,10 +25,12 @@ Vue.config.productionTip = false;
 Vue.use(router);
 Vue.use(Element);
 Vue.use(VueAxios, axios);
-Vue.use(live2d4vue);
+Vue.use(VueCookies)
+Vue.use(VueCodeMirror);
 
 /* eslint-disable no-new */
 new Vue({
+
   el: '#app',
   router,
   render: h => h(App)
