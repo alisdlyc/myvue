@@ -18,7 +18,8 @@ import VueCookies from 'vue-cookies'
 import VueCodeMirror from 'vue-codemirror';
 import 'codemirror/lib/codemirror.css';
 
-
+import * as echarts from 'echarts'
+import ECharts from 'vue-echarts'
 
 Vue.config.productionTip = false;
 
@@ -27,7 +28,7 @@ Vue.use(Element);
 Vue.use(VueAxios, axios);
 Vue.use(VueCookies)
 Vue.use(VueCodeMirror);
-
+Vue.use(ECharts)
 /* eslint-disable no-new */
 new Vue({
 

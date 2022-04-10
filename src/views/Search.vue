@@ -32,8 +32,8 @@
             ></el-table-column>
           </el-table>
         </template>
-
       </el-aside>
+
       <el-container>
         <el-main >
           <el-select v-model="dataSourceValue" placeholder="请选择数据源">
@@ -41,13 +41,14 @@
               v-for="item in dataSource"
               :key="item.value"
               :label="item.label"
-              :value="item.value">
+              :value="item.label">
               <span style="float: left; color: #8492a6; font-size: 10px">{{ item.value}}</span>
             </el-option>
           </el-select>
           <el-button type="success" v-on:click="submit">提交</el-button>
           <el-button type="primary" v-on:click="excelDownload">下载</el-button>
-          <el-button type="info">DashBoard</el-button>
+          <el-button type="primary" v-on:click="toDashBoard">DashBoard</el-button>
+          <el-button type="primary" v-on:click="toApply">表权限申请</el-button>
           <codemirror
             ref="mycode"
             v-modle="curCode"
@@ -55,12 +56,9 @@
             class="code"
           >
           </codemirror>
-
         </el-main>
 
-
         <el-footer height="400px">
-
           <template>
             <el-tabs v-model="activeName" @tab-click="handleClick">
               <el-tab-pane label="查询信息" name="searchInfo">
@@ -94,6 +92,7 @@
 .code {
   margin-top: 20px;
   margin-bottom: 20px;
+  font-size: 18px;
 }
 .text-wrapper {
   white-space: pre-wrap;
@@ -154,30 +153,39 @@ export default {
   },
   methods: {
     submit: function () {
-      let sqlContext = this.$refs.mycode.codemirror.getValue();
+      if(this.$data.dataSourceValue === '') {
+        this.$message({
+          message: '请选择数据源',
+          type: 'error',
+          duration: 500
+        })
+      } else {
+        this.$message({
+          message: '提交成功',
+          type: 'success',
+          duration: 500
+        })
+        let sqlContext = this.$refs.mycode.codemirror.getValue();
 
-      this.$data.searchInfo = "SQL: \n" + sqlContext
-      let data = new FormData
-      data.append("sqlContext", sqlContext)
-      data.append("username", this.$cookies.get("username"))
-      axios.post('http://127.0.0.1:8080/sql/query', data)
-      .then(res => {
-        if(res.status === 200) {
-          this.$data.searchInfo += "\n查询结束"
-          let keys = []
-          for(let key in res.data[0]) {
-            let str = {}
-            str['prop'] = key
-            str['label'] = key
-            keys.push(str)
-          }
-          this.$data.colConfigs = keys
-          this.$data.colData = res.data
-        } else {
-          console.log("查询失败")
-        }
-
-      })
+        this.$data.searchInfo = "SQL: \n" + sqlContext
+        let data = new FormData
+        data.append("sqlContext", sqlContext)
+        data.append("username", this.$cookies.get("username"))
+        data.append("dataSource", this.$data.dataSourceValue)
+        axios.post('http://127.0.0.1:8080/sql/query', data)
+          .then(res => {
+            this.$data.searchInfo += "\n查询结束"
+            let keys = []
+            for(let key in res.data[0]) {
+              let str = {}
+              str['prop'] = key
+              str['label'] = key
+              keys.push(str)
+            }
+            this.$data.colConfigs = keys
+            this.$data.colData = res.data
+          })
+      }
     },
 
     searchTables: function () {
@@ -231,10 +239,33 @@ export default {
       let str = new Blob([data], {type: 'text/plain;charset=utf-8'})
       saveAs(str, fileName)
     },
+
+    toDashBoard() {
+      if (this.$data.colData.length !== 0) {
+        this.$router.push({
+          name: '/dashboard',
+          params: {
+            colConfigs: this.$data.colConfigs,
+            colData: this.$data.colData
+          }
+        })
+      } else {
+        this.$message({
+          message: '请先查询数据',
+          type: 'error',
+          duration: 500
+        })
+      }
+    },
+
+    toApply: function () {
+      this.$router.push("/apply")
+    }
   },
   components:{
     codemirror
   },
+
   mounted() {
     this.$refs.mycode.codemirror.setSize("auto", (document.documentElement.clientHeight-550) + "px")
   }
