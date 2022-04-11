@@ -1,36 +1,86 @@
 <template>
-  <main>
-    <v-chart :options="polar"/>
-
-  </main>
+  <v-chart class="chart" :option="option" />
 </template>
 
-<style>
-/**
- * 默认尺寸为 600px×400px，如果想让图表响应尺寸变化，可以像下面这样
- * 把尺寸设为百分比值（同时请记得为容器设置尺寸）。
- */
-.echarts {
-  width: 600px;
-  height: 600px;
-}
-</style>
-
 <script>
-import ECharts from 'vue-echarts'
-import 'echarts/lib/chart/line'       //绘制不同的图表要引入不同的chart和component
-import 'echarts/lib/component/polar'
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { PieChart } from "echarts/charts";
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent
+} from "echarts/components";
+import VChart, { THEME_KEY } from "vue-echarts";
+
+use([
+  CanvasRenderer,
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent
+]);
 
 export default {
+  name: "HelloWorld",
   components: {
-    'v-chart': ECharts
+    VChart
   },
-  data () {
+  provide: {
+    // [THEME_KEY]: "dark"
+  },
+  data() {
     return {
-      polar: {
-        // 指定图表的配置项和数据
+      option: {
+        title: {
+          text: "Traffic Sources",
+          left: "center"
+        },
+        tooltip: {
+          trigger: "item",
+          formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+        legend: {
+          orient: "vertical",
+          left: "left",
+          data: [
+            "Direct",
+            "Email",
+            "Ad Networks",
+            "Video Ads",
+            "Search Engines"
+          ]
+        },
+        series: [
+          {
+            name: "Traffic Sources",
+            type: "pie",
+            radius: "55%",
+            center: ["50%", "60%"],
+            data: [
+              { value: 335, name: "Direct" },
+              { value: 310, name: "Email" },
+              { value: 234, name: "Ad Networks" },
+              { value: 135, name: "Video Ads" },
+              { value: 1548, name: "Search Engines" }
+            ],
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: "rgba(0, 0, 0, 0.5)"
+              }
+            }
+          }
+        ]
       }
-    }
+    };
   }
-}
+};
 </script>
+
+<style scoped>
+.chart {
+  height: 400px;
+}
+</style>

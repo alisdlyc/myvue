@@ -28,6 +28,10 @@ export default new VueRouter({
       name: '/dashboard',
       path: '/dashboard',
       component: DashBoard
+    },
+    {
+      path: '/*',
+      component: Main
     }
   ]
 });
