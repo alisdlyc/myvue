@@ -96,12 +96,11 @@
         </el-tab-pane>
 
 
-        <el-tab-pane  label="权限审批" name="permitHistory" class="painter">
+        <el-tab-pane  label="权限审批" name="permitHistory" class="painter" style="height: 90%">
           <el-tabs type="border-card" v-model="permitSwitch" style="height: 80%">
-            <el-tab-pane label="待审批" name="todoTab">
+            <el-tab-pane label="待审批" name="todoTab" style="height: 100%">
               <el-table
                 :data="permitHistoryColData"
-                height="100%"
                 border
                 style="width: 100%">
                 <el-table-column v-for="{prop, label} in permitHistoryColConfig" :key="prop" :prop="prop" :label="label"

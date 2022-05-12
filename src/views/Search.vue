@@ -104,13 +104,13 @@
 </style>
 
 <script>
-import { codemirror } from 'vue-codemirror';
-import 'codemirror/theme/liquibyte.css';//导入选中的theme主题,与初始化theme配置一致
-import 'codemirror/addon/hint/show-hint.css';//导入自动提示核心样式
-import 'codemirror/mode/sql/sql.js';//导入使用的语言语法定义文件，初始化mode配置一致
+import {codemirror} from 'vue-codemirror';
+import 'codemirror/theme/liquibyte.css'; //导入选中的theme主题,与初始化theme配置一致
+import 'codemirror/addon/hint/show-hint.css'; //导入自动提示核心样式
+import 'codemirror/mode/sql/sql.js'; //导入使用的语言语法定义文件，初始化mode配置一致
 import 'codemirror/addon/edit/matchbrackets.js';
-import 'codemirror/addon/hint/show-hint.js';//导入自动提示核心文件
-import 'codemirror/addon/hint/sql-hint.js';//导入指定语言的提示文件
+import 'codemirror/addon/hint/show-hint.js'; //导入自动提示核心文件
+import 'codemirror/addon/hint/sql-hint.js'; //导入指定语言的提示文件
 import 'codemirror/theme/idea.css'
 import axios from 'axios'
 import {saveAs} from 'file-saver';
@@ -120,9 +120,6 @@ export default {
   data() {
     return {
       dataSource: [{
-        value: 'MYSQL_CONNECTOR',
-        label: 'MySQL'
-      }, {
         value: 'ELASTICSEARCH_CONNECTOR',
         label: 'ElasticSearch'
       }, {
@@ -153,6 +150,9 @@ export default {
   },
   methods: {
     submit: function () {
+      this.$data.colData = null
+      this.$data.colConfigs = null
+
       if(this.$data.dataSourceValue === '') {
         this.$message({
           message: '请选择数据源',
@@ -163,7 +163,7 @@ export default {
         this.$message({
           message: '提交成功',
           type: 'success',
-          duration: 500
+          duration: 200
         })
         let sqlContext = this.$refs.mycode.codemirror.getValue();
 
@@ -203,8 +203,6 @@ export default {
           str["label"] = res.data[i][k]
           this.$data.tablesInSource.push(str)
         }
-        console.log(this.$data.tablesInSource)
-
       })
     },
 
@@ -242,13 +240,89 @@ export default {
 
     toDashBoard() {
       if (this.$data.colData.length !== 0) {
-        this.$router.push({
-          name: '/dashboard',
-          params: {
-            colConfigs: this.$data.colConfigs,
-            colData: this.$data.colData
+
+        if(this.$data.colConfigs.length !== 2 && this.$data.colConfigs.length !== 3) {
+          this.$message.error({
+            message: '系统仅支持二维和三维数据的可视化',
+            type: 'error',
+            duration: 500
+          })
+        } else {
+          let keys = []
+          for(let item in this.$data.colConfigs) {
+            keys.push(this.$data.colConfigs[item]['prop'])
           }
-        })
+
+          if(this.$data.colConfigs.length === 2) {
+            let k1 = this.$data.colConfigs[0]['prop']
+            let k2 = this.$data.colConfigs[1]['prop']
+            let re = []
+
+            for(let item of this.$data.colData) {
+              let tmp = {}
+              tmp['value'] = item[k2]
+              tmp['name'] = item[k1]
+              re.push(tmp)
+            }
+            this.$router.push({
+              name: '/dashboard',
+              params: {
+                re: re,
+                dim: "2"
+              }
+            })
+          }
+
+          if(this.$data.colConfigs.length === 3) {
+            // Map{k1, [k2, v]}
+            let k1 = new Set()
+            let k2 = new Set()
+            for(let item of this.$data.colData) {
+              k1.add(item[keys[0]])
+              k2.add(item[keys[1]])
+            }
+
+            let timeKeyArr = Array.from(k1)
+            let colKeyArr = Array.from(k2)
+            let value = {}
+            for(let k of colKeyArr) {
+              value[k] = {}
+            }
+
+            let dic = {}
+            for(let index in timeKeyArr) {
+              dic[timeKeyArr[index]] = index
+            }
+
+
+            let re = []
+            console.log("colData: " + JSON.stringify(this.$data.colData))
+            for(let k of colKeyArr) {
+              let tmp = {}
+              let arr = new Array(timeKeyArr.length)
+              for(let item of this.$data.colData) {
+                if(item[keys[1]] === k) {
+                  arr[dic[item[keys[0]]]] = item[keys[2]]
+                }
+              }
+              tmp['name'] = k
+              tmp['type'] = 'line'
+              tmp['stack'] = 'Total'
+              tmp['data'] = arr
+              re.push(tmp)
+
+              this.$router.push({
+                name: '/dashboard',
+                params: {
+                  k1: timeKeyArr,
+                  k2: colKeyArr,
+                  re: re,
+                  dim: "3"
+                }
+              })
+            }
+          }
+        }
       } else {
         this.$message({
           message: '请先查询数据',

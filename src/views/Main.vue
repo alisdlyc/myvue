@@ -8,23 +8,24 @@
         <el-tabs type="border-card">
           <el-tab-pane label="登录" style="margin-top: 20px">
             <el-input
-              placeholder="请输入内容"
-              v-model="input"
+              placeholder="请输入账号"
+              v-model="usr"
               clearable>
             </el-input>
 
-            <el-input placeholder="请输入密码" v-model="input" show-password style="margin-top: 20px"></el-input>
+            <el-input placeholder="请输入密码" v-model="pwd" show-password style="margin-top: 20px"></el-input>
             <el-button type="success" v-on:click="toLogin" style="margin-top: 20px">login</el-button>
           </el-tab-pane>
 
           <el-tab-pane label="注册">
             <el-input
-              placeholder="请输入内容"
+              placeholder="请输入用户名"
               v-model="input"
               clearable style="margin-top: 20px">
             </el-input>
             <el-input placeholder="请输入密码" v-model="input" show-password style="margin-top: 20px"></el-input>
             <el-input placeholder="请输入密码" v-model="input" show-password style="margin-top: 20px"></el-input>
+            <el-input placeholder="请输入手机号" v-model="input" show-password style="margin-top: 20px"></el-input>
             <el-button type="success" v-on:click="toLogin" style="margin-top: 20px">register</el-button>
           </el-tab-pane>
         </el-tabs>

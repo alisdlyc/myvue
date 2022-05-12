@@ -1,5 +1,12 @@
 <template>
-  <v-chart class="chart" :option="option" />
+  <div>
+    <div v-if="this.$route.params.dim === '2'">
+      <v-chart class="chart" :option="option2d" />
+    </div>
+    <div v-else>
+      <v-chart class="chart" :option="option" />
+    </div>
+  </div>
 </template>
 
 <script>
@@ -21,35 +28,27 @@ use([
   LegendComponent
 ]);
 
+
 export default {
   name: "HelloWorld",
   components: {
     VChart
   },
-  provide: {
-    // [THEME_KEY]: "dark"
-  },
   data() {
     return {
-      option: {
+      option2d: {
         title: {
-          text: "Traffic Sources",
+          text: "数据可视化「饼图」",
           left: "center"
         },
         tooltip: {
           trigger: "item",
           formatter: "{a} <br/>{b} : {c} ({d}%)"
         },
-        legend: {
-          orient: "vertical",
-          left: "left",
-          data: [
-            "Direct",
-            "Email",
-            "Ad Networks",
-            "Video Ads",
-            "Search Engines"
-          ]
+        toolbox: {
+          feature: {
+            saveAsImage: {}
+          }
         },
         series: [
           {
@@ -57,13 +56,7 @@ export default {
             type: "pie",
             radius: "55%",
             center: ["50%", "60%"],
-            data: [
-              { value: 335, name: "Direct" },
-              { value: 310, name: "Email" },
-              { value: 234, name: "Ad Networks" },
-              { value: 135, name: "Video Ads" },
-              { value: 1548, name: "Search Engines" }
-            ],
+            data: this.$route.params.re,
             emphasis: {
               itemStyle: {
                 shadowBlur: 10,
@@ -73,8 +66,40 @@ export default {
             }
           }
         ]
+      },
+      option: {
+        title: {
+          text: '数据可视化「折线图」'
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        legend: {
+          data: this.$route.params.k1 // k1
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {}
+          }
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: this.$route.params.k2 //k2
+        },
+        yAxis: {
+          type: 'value'
+        },
+
+        series: this.$route.params.re
       }
-    };
+    }
   }
 };
 </script>
